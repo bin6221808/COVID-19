@@ -343,8 +343,121 @@ def  chinaPip():
     )
     return pie
 
+'''
+中国治愈比率和外国治愈比率对比
+'''
+def rate_Line():
+    wb = openpyxl.load_workbook('COVID-19-China.xlsx')
+    ws_china_confirmed = wb['中国每日累计确诊数据']
+    ws_china_crued = wb['中国每日累计治愈数据']
+    ws_china_died = wb['中国每日累计死亡数据']
+
+    ws_china_confirmed.delete_rows(1)
+    ws_china_crued.delete_rows(1)
+    ws_china_died.delete_rows(1)
+
+    y_china_confirmed = []  # 每日累计确诊
+    y_china_crued = []  # 每日累计治愈
+    y_china_died = []  # 每日累计死亡
+
+    y_china_crued_rate = []
+
+    wb = openpyxl.load_workbook('COVID-19-Global.xlsx')
+    ws_foreign_confirmed = wb['境外每日累计确诊数据']
+    ws_foreign_crued = wb['境外每日累计治愈数据']
+    ws_foreign_died = wb['境外每日累计死亡数据']
+
+    ws_foreign_confirmed.delete_rows(1)
+    ws_foreign_crued.delete_rows(1)
+    ws_foreign_died.delete_rows(1)
+
+    x_date = []  # 日期
+    y_foreign_confirmed = []  # 累计确诊
+    y_foreign_crued = []  # 累计治愈
+    y_foreign_died = []  # 累计死亡
+
+    y_foreign_crued_rate = []
+
+    for foreign_confirmed in ws_foreign_confirmed.values:
+        y_foreign_confirmed.append(foreign_confirmed[1])
+    for foreign_crued in ws_foreign_crued.values:
+        y_foreign_crued.append(foreign_crued[1])
+    for foreign_died in ws_foreign_died.values:
+        y_foreign_died.append(foreign_died[1])
+
+    for item in range(0,len(y_foreign_confirmed)):
+        y_foreign_crued_rate.append(y_foreign_crued[item]/y_foreign_confirmed[item])
 
 
+    for china_confirmed in ws_china_confirmed.values:
+        y_china_confirmed.append(china_confirmed[1])
+    for china_crued in ws_china_crued.values:
+        x_date.append(china_crued[0])
+        y_china_crued.append(china_crued[1])
+    for china_died in ws_china_died.values:
+        y_china_died.append(china_died[1])
+
+    for item in range(0,len(y_china_confirmed)):
+        y_china_crued_rate.append(y_china_crued[item]/y_china_confirmed[item])
+
+
+    fi_map = (
+        Line(init_opts=opts.InitOpts(height='420px'))
+            .add_xaxis(xaxis_data=x_date)
+            .add_yaxis(
+            series_name="中国每日累计治愈/确诊",
+            y_axis=y_china_crued_rate,
+            label_opts=opts.LabelOpts(is_show=False),
+        )
+            .add_yaxis(
+            series_name="境外每日累计治愈/确诊",
+            y_axis=y_foreign_crued_rate,
+            label_opts=opts.LabelOpts(is_show=False),
+        )
+            .set_global_opts(
+            title_opts=opts.TitleOpts(title="中国和境外治愈率对比"),
+            legend_opts=opts.LegendOpts(pos_bottom="bottom", orient='horizontal'),
+            tooltip_opts=opts.TooltipOpts(trigger="axis"),
+            yaxis_opts=opts.AxisOpts(
+                type_="value",
+                axistick_opts=opts.AxisTickOpts(is_show=True),
+                splitline_opts=opts.SplitLineOpts(is_show=True),
+            ),
+            xaxis_opts=opts.AxisOpts(type_="category", boundary_gap=False),
+        )
+    )
+    return fi_map
+
+def china_add():
+    wb = openpyxl.load_workbook('COVID-19-China.xlsx')
+    ws_china_add_confirmed = wb['中国每日新增确诊数据']
+    ws_china_add_confirmed.delete_rows(1)
+    x_date = []  # 日期
+    y_china_add_confirmed = []  # 每日新增确诊
+    for china_confirmed in ws_china_add_confirmed.values:
+        y_china_add_confirmed.append(china_confirmed[1])
+        x_date.append(china_confirmed[0])
+    fi_map = (
+        Line(init_opts=opts.InitOpts(height='420px'))
+            .add_xaxis(xaxis_data=x_date)
+            .add_yaxis(
+            series_name="中国每日累计治愈/确诊",
+            y_axis=y_china_add_confirmed,
+            label_opts=opts.LabelOpts(is_show=False),
+        )
+            .set_global_opts(
+            title_opts=opts.TitleOpts(title="中国新增确诊人数趋势"),
+            legend_opts=opts.LegendOpts(pos_bottom="bottom", orient='horizontal'),
+            tooltip_opts=opts.TooltipOpts(trigger="axis"),
+            yaxis_opts=opts.AxisOpts(
+                type_="value",
+                axistick_opts=opts.AxisTickOpts(is_show=True),
+                splitline_opts=opts.SplitLineOpts(is_show=True),
+            ),
+            xaxis_opts=opts.AxisOpts(type_="category", boundary_gap=False),
+        )
+    )
+    return fi_map
 
 def china_daily_map():
     wb = openpyxl.load_workbook('COVID-19-China.xlsx')
@@ -473,6 +586,8 @@ def all_map():
         global_total_map(),
         china_daily_map(),
         foreign_daily_map(),
+        china_add(),
+        rate_Line(),
         chinaPip()
     )
     page.render('COVID-19.html')

@@ -193,6 +193,7 @@ def china_daily_data(data):
     china_confirmed = ccd_dict['list'][0]['data']  # 每日累计确诊数据
     china_crued = ccd_dict['list'][2]['data']  # 每日累计治愈数据
     china_died = ccd_dict['list'][3]['data']  # 每日累计死亡数据
+    china_add_confirmed = ccd_dict['list'][4]['data']  # 每日新增确诊数据
     wb = openpyxl.load_workbook('COVID-19-China.xlsx')
 
     # 写入每日累计确诊数据
@@ -213,6 +214,12 @@ def china_daily_data(data):
     for data in zip(update_date, china_died):
         ws_china_died.append(data)
 
+    # 写入每日新增确诊数据
+    ws_china_add_confirmed = wb.create_sheet('中国每日新增确诊数据')
+    ws_china_add_confirmed.append(['日期', '数据'])
+    for data in zip(update_date, china_add_confirmed):
+        ws_china_add_confirmed.append(data)
+
     wb.save('COVID-19-China.xlsx')
     print('中国每日累计确诊/治愈/死亡数据已保存至 COVID-19-China.xlsx！')
 
@@ -231,7 +238,7 @@ def get_hongkong_daily_data():
 
 def getdata_test(data):
     # print(data['component'][0].keys())
-    print(data['component'][0]['caseList'])
+    print(data['component'][0]['trend']['list'])
 
 
 def foreign_daily_data(data):
@@ -284,6 +291,8 @@ if __name__ == '__main__':
     """
 
     data_dict = init()
+    # data = get_hongkong_daily_data()
+    # getdata_test(data)
     getdata_test(data_dict)
     china_total_data(data_dict)
     global_total_data(data_dict)
